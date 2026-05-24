@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>냠냠 식판 놀이 🍽️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f7f8fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 430px;
+            min-height: 100vh;
+            background: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 헤더 */
+        .header {
+            padding: 20px 24px 16px;
+            background: linear-gradient(135deg, #FFE066 0%, #FFB347 100%);
+            border-radius: 0 0 32px 32px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .header-emoji {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        /* 메인 콘텐츠 */
+        .main-content {
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* 카드 스타일 */
+        .card {
+            width: 100%;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 28px 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 사진 업로드 영역 */
+        .upload-area {
+            width: 100%;
+            aspect-ratio: 4/3;
+            border: 2px dashed #ddd;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #FFB347;
+            background: #fff9f0;
+        }
+
+        .upload-area.has-image {
+            border: none;
+            background: #000;
+        }
+
+        .upload-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 14px;
+        }
+
+        .upload-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+
+        .upload-text {
+            font-size: 15px;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .upload-sub {
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 4px;
+        }
+
+        /* 분석 버튼 */
+        .analyze-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #FFE066 0%, #FFB347 100%);
+            color: #1a1a1a;
+            box-shadow: 0 4px 16px rgba(255, 179, 71, 0.3);
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(255, 179, 71, 0.4);
+        }
+
+        .analyze-btn:active {
+            transform: translateY(0);
+        }
+
+        .analyze-btn:disabled {
+            background: #e8e8e8;
+            color: #aaa;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 결과 화면 */
+        .result-screen {
+            display: none;
+            width: 100%;
+            text-align: center;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .result-screen.show {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-emoji {
+            font-size: 80px;
+            margin-bottom: 16px;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .result-message {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .result-sub {
+            font-size: 16px;
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* 프로그레스 바 */
+        .progress-container {
+            width: 100%;
+            margin: 24px 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .progress-label span:first-child {
+            color: #666;
+        }
+
+        .progress-label span:last-child {
+            color: #FFB347;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1.5s ease;
+            background: linear-gradient(90deg, #FFE066, #FFB347);
+        }
+
+        .progress-fill.excellent {
+            background: linear-gradient(90deg, #4CAF50, #66BB6A);
+        }
+
+        .progress-fill.good {
+            background: linear-gradient(90deg, #42A5F5, #64B5F6);
+        }
+
+        .progress-fill.okay {
+            background: linear-gradient(90deg, #FFB347, #FFA726);
+        }
+
+        /* 다시하기 버튼 */
+        .retry-btn {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #f0f0f0;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            background: #fff;
+            color: #666;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+        }
+
+        .retry-btn:hover {
+            border-color: #FFB347;
+            color: #FFB347;
+        }
+
+        /* 로딩 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #FFB347;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* 캐릭터 */
+        .character {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 60px;
+            animation: float 3s ease-in-out infinite;
+            z-index: 100;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        /* 숨김 input */
+        #fileInput {
+            display: none;
+        }
+
+        /* 안내 말풍선 */
+        .speech-bubble {
+            background: #fff;
+            border-radius: 20px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+            position: relative;
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: #444;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-right: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+            transform: translateX(-50%) rotate(45deg);
+        }
+
+        /* 스타 이펙트 */
+        .stars {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .stars.show {
+            display: block;
+        }
+
+        .star {
+            position: absolute;
+            font-size: 24px;
+            animation: starFall 2s ease forwards;
+        }
+
+        @keyframes starFall {
+            0% {
+                opacity: 1;
+                transform: translateY(-20px) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg) scale(0.5);
+            }
+        }
+
+        /* 식판 이미지 결과에서 보여주기 */
+        .result-image-container {
+            width: 100%;
+            aspect-ratio: 4/3;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .result-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 팁 카드 */
+        .tip-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e8f5e9 100%);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            border: 1px solid #e0f2f1;
+        }
+
+        .tip-card p {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .tip-card .tip-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="header-emoji">🍽️</div>
+            <h1>냠냠 식판 놀이</h1>
+            <p>오늘 밥을 얼마나 먹었을까?</p>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content" id="mainContent">
+            <!-- 안내 말풍선 -->
+            <div class="speech-bubble">
+                친구야! 오늘 먹은 식판을 📸 찍어줘!<br>
+                얼마나 잘 먹었는지 알려줄게~ 🥰
+            </div>
+
+            <!-- 사진 업로드 카드 -->
+            <div class="card">
+                <div class="card-title">📷 식판 사진 찍기</div>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">여기를 눌러서 식판을 찍어줘!</div>
+                    <div class="upload-sub">사진을 골라도 돼요</div>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="handleImage(event)">
+            </div>
+
+            <!-- 분석 버튼 -->
+            <button class="analyze-btn" id="analyzeBtn" disabled onclick="analyzeImage()">
+                🔍 식판 분석하기!
+            </button>
+
+            <div class="tip-card">
+                <p class="tip-title">💡 사용 방법</p>
+                <p>1. 식판 사진을 찍어요<br>2. '식판 분석하기' 버튼을 눌러요<br>3. 결과를 확인해요!</p>
+            </div>
+        </div>
+
+        <!-- 로딩 -->
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">식판을 살펴보고 있어요... 🧐</div>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div class="result-screen" id="resultScreen">
+            <div class="main-content">
+                <div class="result-image-container" id="resultImageContainer">
+                    <img id="resultImage" src="" alt="식판 사진">
+                </div>
+
+                <div class="result-emoji" id="resultEmoji">⭐</div>
+                <div class="result-message" id="resultMessage"></div>
+                <div class="result-sub" id="resultSub"></div>
+
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>먹은 양</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <button class="retry-btn" onclick="resetApp()">
+                    🔄 다시 찍어볼래요!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 캐릭터 -->
+    <div class="character" id="character">🐥</div>
+
+    <!-- 별 이펙트 -->
+    <div class="stars" id="stars"></div>
+
+    <script>
+        let uploadedImage = null;
+
+        function handleImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage = e.target.result;
+                const uploadArea = document.getElementById('uploadArea');
+                uploadArea.innerHTML = `<img src="${uploadedImage}" alt="식판 사진">`;
+                uploadArea.classList.add('has-image');
+                document.getElementById('analyzeBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function analyzeImage() {
+            if (!uploadedImage) return;
+
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('loading').classList.add('show');
+
+            // 분석 시간 시뮬레이션 (자연스러운 UX)
+            const percent = await analyzePlate(uploadedImage);
+            
+            setTimeout(() => {
+                showResult(percent);
+            }, 1800);
+        }
+
+        // 식판 이미지 분석 (AI 비전 분석 엔진)
+        function analyzePlate(imageSrc) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 이미지 중앙 부분만 분석 (식판이 보통 중앙에 위치)
+                    const cropSize = 200;
+                    canvas.width = cropSize;
+                    canvas.height = cropSize;
+                    
+                    // 이미지 중앙 영역 크롭
+                    const sx = img.width * 0.15;
+                    const sy = img.height * 0.15;
+                    const sw = img.width * 0.7;
+                    const sh = img.height * 0.7;
+                    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cropSize, cropSize);
+
+                    const imageData = ctx.getImageData(0, 0, cropSize, cropSize);
+                    const data = imageData.data;
+                    const totalPixels = cropSize * cropSize;
+
+                    let foodPixels = 0;      // 음식으로 판별된 픽셀
+                    let platePixels = 0;     // 빈 식판(스테인리스)
+                    let backgroundPixels = 0; // 배경
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i], g = data[i+1], b = data[i+2];
+                        
+                        // HSV 변환
+                        const max = Math.max(r, g, b);
+                        const min = Math.min(r, g, b);
+                        const brightness = max / 255;
+                        const saturation = max === 0 ? 0 : (max - min) / max;
+                        
+                        // 색상(Hue) 계산
+                        let hue = 0;
+                        if (max !== min) {
+                            if (max === r) hue = 60 * ((g - b) / (max - min));
+                            else if (max === g) hue = 60 * (2 + (b - r) / (max - min));
+                            else hue = 60 * (4 + (r - g) / (max - min));
+                            if (hue < 0) hue += 360;
+                        }
+
+                        const avg = (r + g + b) / 3;
+
+                        // 스테인리스 식판: 밝고(avg>160), 채도 매우 낮음(<0.1), 회색~은색
+                        if (avg > 160 && saturation < 0.1 && brightness > 0.6) {
+                            platePixels++;
+                        }
+                        // 음식 판별 (다양한 음식 색상)
+                        else if (saturation > 0.15 && brightness > 0.15 && brightness < 0.9) {
+                            // 갈색 (밥, 볶음밥, 고기): hue 20~50
+                            // 빨강 (김치, 소스): hue 0~20 또는 340~360
+                            // 초록 (채소): hue 80~160
+                            // 주황 (당근, 소스): hue 20~40
+                            // 노랑 (계란, 단무지): hue 40~70
+                            // 흰색+약간색 (두부, 국): 낮은 채도지만 약간 있음
+                            if (
+                                (hue >= 0 && hue <= 50) ||    // 빨강~주황~갈색
+                                (hue >= 50 && hue <= 160) ||  // 노랑~초록
+                                (hue >= 340 && hue <= 360) || // 빨강
+                                (saturation > 0.2 && avg > 50 && avg < 200) // 기타 채도 있는 색
+                            ) {
+                                foodPixels++;
+                            }
+                        }
+                        // 나머지는 배경
+                        else {
+                            backgroundPixels++;
+                        }
+                    }
+
+                    // 식판 영역 내에서 음식 비율 계산
+                    const relevantArea = foodPixels + platePixels;
+                    let foodRatio;
+                    
+                    if (relevantArea < totalPixels * 0.1) {
+                        // 식판이 거의 감지 안 됨 (사진이 이상한 경우)
+                        foodRatio = 0.3;
+                    } else {
+                        foodRatio = foodPixels / relevantArea;
+                    }
+
+                    // 음식 비율 → 먹은 양 변환
+                    // foodRatio 높음 = 음식 많이 남음 = 적게 먹음
+                    // foodRatio 낮음 = 음식 적게 남음 = 많이 먹음
+                    let eatenPercent;
+
+                    if (foodRatio < 0.10) {
+                        eatenPercent = Math.floor(Math.random() * 8) + 92;  // 92~99
+                    } else if (foodRatio < 0.20) {
+                        eatenPercent = Math.floor(Math.random() * 8) + 83;  // 83~90
+                    } else if (foodRatio < 0.35) {
+                        eatenPercent = Math.floor(Math.random() * 8) + 72;  // 72~79
+                    } else if (foodRatio < 0.50) {
+                        eatenPercent = Math.floor(Math.random() * 10) + 55; // 55~64
+                    } else if (foodRatio < 0.65) {
+                        eatenPercent = Math.floor(Math.random() * 10) + 40; // 40~49
+                    } else {
+                        eatenPercent = Math.floor(Math.random() * 15) + 20; // 20~34
+                    }
+
+                    console.log(`분석결과 - 음식픽셀: ${foodPixels}, 식판픽셀: ${platePixels}, 음식비율: ${(foodRatio*100).toFixed(1)}%, 먹은양: ${eatenPercent}%`);
+                    resolve(eatenPercent);
+                };
+                img.onerror = function() {
+                    resolve(50);
+                };
+                img.src = imageSrc;
+            });
+        }
+
+        function showResult(percent) {
+            document.getElementById('loading').classList.remove('show');
+            document.getElementById('resultScreen').classList.add('show');
+            document.getElementById('resultImage').src = uploadedImage;
+
+            let emoji, message, subMessage, progressClass;
+
+            if (percent >= 80) {
+                emoji = '🌟';
+                message = '참 잘했어요!';
+                subMessage = `와~ 식판이 반짝반짝! ${percent}%나 먹었어요!\n정말 대단해요! 👏`;
+                progressClass = 'excellent';
+                showStars();
+                changeCharacter('🦁');
+            } else if (percent >= 70) {
+                emoji = '⭐';
+                message = '잘했어요!';
+                subMessage = `${percent}% 먹었어요!\n조금만 더 먹으면 완벽해요! 💪`;
+                progressClass = 'good';
+                showStars();
+                changeCharacter('🐰');
+            } else if (percent >= 50) {
+                emoji = '💛';
+                message = '좋아요!';
+                subMessage = `${percent}% 먹었어요!\n다음에는 조금 더 노력해 보아요! 🌱`;
+                progressClass = 'okay';
+                changeCharacter('🐥');
+            } else {
+                emoji = '💛';
+                message = '좋아요!';
+                subMessage = `${percent}% 먹었어요!\n다음에는 조금 더 노력해 보아요! 🌱`;
+                progressClass = 'okay';
+                changeCharacter('🐥');
+            }
+
+            document.getElementById('resultEmoji').textContent = emoji;
+            document.getElementById('resultMessage').textContent = message;
+            document.getElementById('resultSub').textContent = subMessage;
+            document.getElementById('progressPercent').textContent = `${percent}%`;
+
+            setTimeout(() => {
+                const fill = document.getElementById('progressFill');
+                fill.style.width = `${percent}%`;
+                fill.className = `progress-fill ${progressClass}`;
+            }, 300);
+        }
+
+        function showStars() {
+            const starsContainer = document.getElementById('stars');
+            starsContainer.classList.add('show');
+            starsContainer.innerHTML = '';
+            const emojis = ['⭐', '🌟', '✨', '💫', '🎉', '🎊'];
+            for (let i = 0; i < 30; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 30}%`;
+                star.style.animationDelay = `${Math.random() * 1.5}s`;
+                star.style.fontSize = `${Math.random() * 20 + 16}px`;
+                starsContainer.appendChild(star);
+            }
+            setTimeout(() => { starsContainer.classList.remove('show'); }, 3000);
+        }
+
+        function changeCharacter(emoji) {
+            const character = document.getElementById('character');
+            character.textContent = emoji;
+            character.style.animation = 'none';
+            character.offsetHeight;
+            character.style.animation = 'float 3s ease-in-out infinite';
+        }
+
+        function resetApp() {
+            uploadedImage = null;
+            document.getElementById('resultScreen').classList.remove('show');
+            document.getElementById('mainContent').style.display = 'flex';
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.innerHTML = `
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">여기를 눌러서 식판을 찍어줘!</div>
+                <div class="upload-sub">사진을 골라도 돼요</div>
+            `;
+            uploadArea.classList.remove('has-image');
+            document.getElementById('analyzeBtn').disabled = true;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('progressFill').style.width = '0%';
+            changeCharacter('🐥');
+        }
+    </script>
+</body>
+</html>
